@@ -11,7 +11,10 @@ import random
 from fredapi import Fred
 from scipy.optimize import minimize
 import fredapi as fred
+from flask_cors import CORS  # Import CORS
+
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Converts string to datetime
 def str_to_datetime(s):
