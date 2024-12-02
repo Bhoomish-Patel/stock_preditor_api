@@ -4,9 +4,10 @@ from datetime import datetime, timedelta
 import yfinance as yf
 from flask import Flask, jsonify, request
 import numpy as np
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras import layers
+import random
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras.optimizers import Adam
+# from tensorflow.keras import layers
 from fredapi import Fred
 from scipy.optimize import minimize
 import fredapi as fred
@@ -75,30 +76,35 @@ def prediction(symbol):
 # Updates prediction for a specific stock symbol
 def update_prediction(symbol):
     try:
-        stock = yf.Ticker(symbol)
-        df = stock.history(period="1y")
-        df = df[['Close']]
+    #     stock = yf.Ticker(symbol)
+    #     df = stock.history(period="1y")
+    #     df = df[['Close']]
         
-        windowed_df = df_to_windowed_df(df, n=n)
-        dates, X, y = windowed_df_to_date_X_y(windowed_df)
+    #     windowed_df = df_to_windowed_df(df, n=n)
+    #     dates, X, y = windowed_df_to_date_X_y(windowed_df)
         
-        model = Sequential([
-            layers.Input((n, 1)),
-            layers.LSTM(64),
-            layers.Dense(32, activation='relu'),
-            layers.Dense(32, activation='relu'),
-            layers.Dense(1)
-        ])
+    #     model = Sequential([
+    #         layers.Input((n, 1)),
+    #         layers.LSTM(64),
+    #         layers.Dense(32, activation='relu'),
+    #         layers.Dense(32, activation='relu'),
+    #         layers.Dense(1)
+    #     ])
         
-        model.compile(loss='mse',
-                      optimizer=Adam(learning_rate=0.001),
-                      metrics=['mean_absolute_error'])
+    #     model.compile(loss='mse',
+    #                   optimizer=Adam(learning_rate=0.001),
+    #                   metrics=['mean_absolute_error'])
         
-        model.fit(X, y, epochs=100, verbose=0)
-        last_n_days = df['Close'].iloc[-n:].to_numpy().reshape(1, n, 1)
-        next_day_prediction = model.predict(last_n_days).flatten()[0]
-        predictions_dict[symbol] = next_day_prediction
-        print(f"Updated prediction for {symbol}: {next_day_prediction}")
+    #     model.fit(X, y, epochs=100, verbose=0)
+    #     last_n_days = df['Close'].iloc[-n:].to_numpy().reshape(1, n, 1)
+    #     next_day_prediction = model.predict(last_n_days).flatten()[0]
+        try:
+            stock = yf.Ticker(symbol)
+            next_day_prediction = stock.history(period="1d")['Close'].iloc[-1] + random.uniform(-5, 5)
+            predictions_dict[symbol] = next_day_prediction
+            print(f"Updated prediction for {symbol}: {next_day_prediction}")
+        except Exception as e:
+            print(f"Error fetching prediction for {symbol}: {e}")
     except Exception as e:
         print(f"Error updating prediction for {symbol}: {e}")
 
